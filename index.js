@@ -6,6 +6,10 @@ typeof module !== 'undefined' && (
     }
 );
 
+/** index from 0 ~ 2: worker, js, wasm 
+ * @type {string[]}
+*/
+let __PNGCRUSH_WASM_BLOB_URLS = [];
 
 /**
  * Optimize a png file.
@@ -38,7 +42,6 @@ function crushPng(file, conf = {}) {
     }
 
     const __DEFAULT_FETCH_URL_PREFIX = 'https://unpkg.com/pngcrush-wasm@latest/wasm/';
-    // TODO: fetch and convert to blob url for the worker, pngcrush.js and pngcrush.wasm files
 
     return new Promise(async (resolve, reject) => {
         try {
@@ -51,18 +54,15 @@ function crushPng(file, conf = {}) {
                 reject(new Error('Invalid file object. Expected type: File | ArrayBuffer | Blob | Uint8Array'));
             }
 
-            /** index from 0 ~ 2: worker, js, wasm */
-            let blobUrls = [];
-
-            if (!conf.workerPath) {
-                blobUrls = await Promise.all([
+            if (!conf.workerPath && __PNGCRUSH_WASM_BLOB_URLS.length !== 3) {
+                __PNGCRUSH_WASM_BLOB_URLS = await Promise.all([
                     toBlobUrl(__DEFAULT_FETCH_URL_PREFIX + 'worker.js', 'application/javascript'),
                     toBlobUrl(__DEFAULT_FETCH_URL_PREFIX + 'pngcrush.js', 'application/javascript'),
                     toBlobUrl(__DEFAULT_FETCH_URL_PREFIX + 'pngcrush.wasm', 'application/wasm')
                 ]);
             }
 
-            const worker = new Worker(conf.workerPath || blobUrls[0]);
+            const worker = new Worker(conf.workerPath || __PNGCRUSH_WASM_BLOB_URLS[0]);
 
             let timeout = null;
             if (typeof conf.timeout === 'number') {
@@ -109,8 +109,8 @@ function crushPng(file, conf = {}) {
                 file: file,
                 ...Array.isArray(conf?.args) ? { args: conf?.args } : {},
                 ...conf.workerPath ? {} : {
-                    wasmJSUrl: blobUrls[1],
-                    wasmBinaryUrl: blobUrls[2]
+                    wasmJSUrl: __PNGCRUSH_WASM_BLOB_URLS[1],
+                    wasmBinaryUrl: __PNGCRUSH_WASM_BLOB_URLS[2]
                 }
             });
         } catch (err) {

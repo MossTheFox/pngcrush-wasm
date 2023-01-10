@@ -10,9 +10,15 @@ export type CrushPngConfig = {
      * 
      * Check [ubuntu manuals: pngcrush](https://manpages.ubuntu.com/manpages/focal/en/man1/pngcrush.1.html) for detailed options.
      * 
+     * More args examples:
+     * - `["-v"]`: Verbose mode (1.18.12, get the same behavior as previous version)
+     * - `["-brute"]`: Use all crush methods and pick the best one. Time consuming.
+     * - `["-reduce"]`: Calculate the colors used, and try to reduce the bitdepth.
+     * - `["-m", "7"]`: Use the 7th method. Quick but not too efficient.
+     * - `["-rem", "text"]`: Remove all text chunks.
      */
     args?: string[];
-    /** A function that accepts each line of stdout (stderr) from pngcrush; */
+    /** A function that accepts each line of stdout (stderr) from pngcrush. */
     logger?: (msg: string) => void;
     /** Specify the path for the Web Worker */
     workerPath?: string | URL;

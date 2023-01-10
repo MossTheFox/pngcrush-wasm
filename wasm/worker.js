@@ -66,16 +66,7 @@ self.addEventListener('message', async (e) => {
         });
         // Convert one single file. Expecred message payload: { type: "run", data: Buffer }
         if (data.type === 'run' && (data.file instanceof ArrayBuffer || data.file instanceof Uint8Array || data.file instanceof Blob || data.file instanceof File)) {
-            /** args example (pass an array of string)
-             * - ["-v"]: Verbose mode (1.18.12, get the same behavior as previous version)
-             * - ["-brute"]: Use all crush methods and pick the best one. Time consuming.
-             * - ["-reduce"]: Calculate the colors used, and try to reduce the bitdepth.
-             * - ["-m", "7"]: Use the 7th method. Quick but not too efficient (https://zoompf.com/blog/2014/11/png-optimization/).
-             * - ["-rem", "text"]: Remove all text chunks.
-             * 
-             * default (from the helpful blog link above):
-             * - ["-v", "-rem", "alla", "-nofilecheck", "-reduce"]
-             */
+
             const extraArgs = Array.isArray(data.args) ? data.args : DEFAULT_ARGS;
 
             let file = data.file;
@@ -109,10 +100,6 @@ self.addEventListener('message', async (e) => {
             return;
         }
 
-        // if (data.type === 'exec' && Array.isArray(data.args)) {
-        //     pngcrush.callMain(data.args);
-        //     return;
-        // }
         postBackMessage('rejected', "Invalid method.");
     } catch (err) {
         postBackMessage('rejected', 'Error occurred during execution. Message: ' + err?.message);

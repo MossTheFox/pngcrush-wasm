@@ -1,6 +1,6 @@
 {
   "name": "pngcrush-wasm",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Use the nice tool pngcrush in browsers with WASM support.",
   "main": "index.js",
   "types": "index.d.ts",

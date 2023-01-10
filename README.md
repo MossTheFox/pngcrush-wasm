@@ -18,12 +18,25 @@ Then, take the two files `pngcrush.js` `pngcrush.wasm` and you're ready to go. C
 
 ## Basic Usage
 
+Import with `<script>` tag, the global function `crushPng` will be available:
+
+```html
+<script src="https://unpkg.com/pngcrush-wasm@latest/index.js"></script>
+```
+
+Or, in ESM format:
+
+```javascript
+import { crushPng } from "pngcrush-wasm";
+```
+
 Note: pngcrush-wasm uses Web Worker to load the wasm module. This will help to provide support for processing multiple files at the same time. The web worker will be terminated when the compression process finished or exited with error.
 
 The script will load the worker from unpkg ( https://unpkg.com/pngcrush-wasm@latest/wasm/worker.js ) by default. You can host your own by specifying the `workerPath`. Check the following examples.
 
+
+
 ```javascript
-import { crushPng } from "pngcrush-wasm";
 
 const res = await fetch('example.png');
 const file = await res.arrayBuffer();
@@ -74,7 +87,7 @@ const optimizedFile = await crushPng(file, {
 
 ## Config
 
-- `workerPath`: Specify the path for the Web Worker;
+- `workerPath`: Specify the path for the Web Worker if you are hosting the static files on your own;
 - `args`: An array of string to pass as arguments for pngcrush commandline;
     - Example: `args: ["-v", "-brute"]`
         - `-v` for verbose mode which logs some detailed process data (the default verbosity is 0 (quiet) since pngcrush 1.8.12)
@@ -103,6 +116,18 @@ const optimizedFile = await crushPng(file, {
 });
 
 ```
+
+## Update Log
+
+1.0.4
+
+- Static assests loaded from unpkg will now only fetch once.
+- Remove large chunks of comment in worker.js
+- Update README.md
+
+1.0.1 ~ 1.0.3
+
+- Add support for automatically loading worker and pngcrush wasm modules from unpkg.
 
 ## License
 
