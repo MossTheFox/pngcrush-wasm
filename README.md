@@ -20,7 +20,7 @@ Then, take the two files `pngcrush.js` `pngcrush.wasm` and you're ready to go. C
 
 Note: pngcrush-wasm uses Web Worker to load the wasm module. This will help to provide support for processing multiple files at the same time. The web worker will be terminated when the compression process finished or exited with error.
 
-The script will load the worker from unpkg ( https://unpkg.com/pngcrush-wasm@latest/wasm/worker.js ) by default. You can host your own by specifying the `workerPath`. Check the following examples.
+You need to host the static files and specify `workerPath`. Check the examples following.
 
 ```javascript
 import { crushPng } from "pngcrush-wasm";

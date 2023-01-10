@@ -30,22 +30,23 @@ typeof module !== 'undefined' && (
  */
 function crushPng(file, conf = {}) {
 
-    const __DEFAULT_WORKER_URL = 'https://unpkg.com/pngcrush-wasm@latest/wasm/worker.js';
+    // const __DEFAULT_WORKER_URL = 'https://unpkg.com/pngcrush-wasm@latest/wasm/worker.js';
+    // TODO: fetch and convert to blob url for the worker, pngcrush.js and pngcrush.wasm files
 
-    conf = {
-        workerPath: __DEFAULT_WORKER_URL,
-        ...conf
-    };
-    if (!(
-        file instanceof File ||
-        file instanceof ArrayBuffer ||
-        file instanceof Blob ||
-        file instanceof Uint8Array
-    )) {
-        throw new Error('Invalid file object. Expected type: File | ArrayBuffer | Blob | Uint8Array');
-    }
     return new Promise((resolve, reject) => {
         try {
+            if (!conf.workerPath) {
+                reject(new Error("No worker path specified."));
+            }
+
+            if (!(
+                file instanceof File ||
+                file instanceof ArrayBuffer ||
+                file instanceof Blob ||
+                file instanceof Uint8Array
+            )) {
+                reject(new Error('Invalid file object. Expected type: File | ArrayBuffer | Blob | Uint8Array'));
+            }
             const worker = new Worker(conf.workerPath || __DEFAULT_WORKER_URL);
 
             let timeout = null;
