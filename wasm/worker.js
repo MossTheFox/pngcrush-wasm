@@ -1,9 +1,9 @@
 'use strict';
 
 // module name: createPngcrushModule
-const WASM_MODULE_URL = 'pngcrush.js';
+const WASM_JS_MODULE_URL = 'pngcrush.js';
 
-const DEFAULT_ARGS =  ["-v", "-rem", "alla", "-nofilecheck", "-reduce"];
+const DEFAULT_ARGS = ["-v", "-rem", "alla", "-nofilecheck", "-reduce"];
 
 /**
  * Post the data back to window.
@@ -19,11 +19,21 @@ function postBackMessage(type, message, file) {
     });
 }
 
+/**
+ * Note: typeof e.data
+ * {
+ *     wasmJSUrl: string;      // blob url to fetch for pngcrush.js if loaded from unpkg
+ *     wasmBinaryUrl: string;  // blob url to fetch for pngcrush.wasm
+ *     type: "run",
+ *     file: ArrayBuffer | Uint8Array | Blob |,
+ *     args: string[]
+ * }
+ */
 self.addEventListener('message', async (e) => {
     const data = e.data;
     if (!data) return;
     try {
-        importScripts(WASM_MODULE_URL);
+        importScripts(data.wasmJSUrl || WASM_JS_MODULE_URL);
     } catch (err) {
         postBackMessage('err', 'Fail to load wasm module, err message: ' + err?.message);
         console.error(err);
@@ -51,7 +61,8 @@ self.addEventListener('message', async (e) => {
                 if (msg in LOG_FLAGS) {
                     errorRecord = LOG_FLAGS[msg];
                 }
-            }
+            },
+            ...data.wasmBinaryUrl ? { wasmBinary: await (await fetch(data.wasmBinaryUrl)).arrayBuffer() } : {}
         });
         // Convert one single file. Expecred message payload: { type: "run", data: Buffer }
         if (data.type === 'run' && (data.file instanceof ArrayBuffer || data.file instanceof Uint8Array || data.file instanceof Blob || data.file instanceof File)) {
@@ -67,7 +78,7 @@ self.addEventListener('message', async (e) => {
              */
             const extraArgs = Array.isArray(data.args) ? data.args : DEFAULT_ARGS;
 
-            const file = data.file;
+            let file = data.file;
             if (file instanceof File) {
                 file = await file.arrayBuffer();
             }

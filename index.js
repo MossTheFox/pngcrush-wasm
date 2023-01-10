@@ -30,15 +30,18 @@ typeof module !== 'undefined' && (
  */
 function crushPng(file, conf = {}) {
 
-    // const __DEFAULT_WORKER_URL = 'https://unpkg.com/pngcrush-wasm@latest/wasm/worker.js';
+    async function toBlobUrl(url, mime) {
+        let res = await fetch(url);
+        let arrayBuffer = await res.arrayBuffer();
+
+        return URL.createObjectURL(new Blob([arrayBuffer], { type: mime ?? res.type }))
+    }
+
+    const __DEFAULT_FETCH_URL_PREFIX = 'https://unpkg.com/pngcrush-wasm@latest/wasm/';
     // TODO: fetch and convert to blob url for the worker, pngcrush.js and pngcrush.wasm files
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         try {
-            if (!conf.workerPath) {
-                reject(new Error("No worker path specified."));
-            }
-
             if (!(
                 file instanceof File ||
                 file instanceof ArrayBuffer ||
@@ -47,7 +50,19 @@ function crushPng(file, conf = {}) {
             )) {
                 reject(new Error('Invalid file object. Expected type: File | ArrayBuffer | Blob | Uint8Array'));
             }
-            const worker = new Worker(conf.workerPath || __DEFAULT_WORKER_URL);
+
+            /** index from 0 ~ 2: worker, js, wasm */
+            let blobUrls = [];
+
+            if (!conf.workerPath) {
+                blobUrls = await Promise.all([
+                    toBlobUrl(__DEFAULT_FETCH_URL_PREFIX + 'worker.js', 'application/javascript'),
+                    toBlobUrl(__DEFAULT_FETCH_URL_PREFIX + 'pngcrush.js', 'application/javascript'),
+                    toBlobUrl(__DEFAULT_FETCH_URL_PREFIX + 'pngcrush.wasm', 'application/wasm')
+                ]);
+            }
+
+            const worker = new Worker(conf.workerPath || blobUrls[0]);
 
             let timeout = null;
             if (typeof conf.timeout === 'number') {
@@ -92,7 +107,11 @@ function crushPng(file, conf = {}) {
             worker.postMessage({
                 type: 'run',
                 file: file,
-                ...Array.isArray(conf?.args) ? { args: conf?.args } : {}
+                ...Array.isArray(conf?.args) ? { args: conf?.args } : {},
+                ...conf.workerPath ? {} : {
+                    wasmJSUrl: blobUrls[1],
+                    wasmBinaryUrl: blobUrls[2]
+                }
             });
         } catch (err) {
             reject(err);
