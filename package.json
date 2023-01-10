@@ -1,0 +1,24 @@
+{
+  "name": "pngcrush-wasm",
+  "version": "1.0.0",
+  "description": "Use the nice tool pngcrush in browsers with WASM support.",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MossTheFox/pngcrush-wasm.git"
+  },
+  "keywords": [
+    "pngcrush",
+    "WebAssembly"
+  ],
+  "author": "MossTheFox",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MossTheFox/pngcrush-wasm/issues"
+  },
+  "homepage": "https://github.com/MossTheFox/pngcrush-wasm#readme"
+}

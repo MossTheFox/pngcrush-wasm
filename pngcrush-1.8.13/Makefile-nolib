@@ -1,0 +1,65 @@
+# Sample makefile for pngcrush using gcc and GNU make.
+# Glenn Randers-Pehrson
+# Last modified:  3 October 2016
+#
+# Invoke this makefile from a shell prompt in the usual way; for example:
+#
+#	make -f Makefile-nolib [OPTIONS=-Dsomething]
+#
+# This makefile builds a dynamically linked executable.
+
+# macros --------------------------------------------------------------------
+
+# uncomment these 2 lines only if you are using an external copy of libpng:
+PNGINC = /usr/local/include
+PNGLIB = /usr/local/lib
+# uncomment these 2 lines only if you are using an external copy of zlib:
+ZINC = /usr/local/include
+ZLIB = /usr/local/lib
+
+CC = gcc
+LD = $(CC)
+RM = rm -f
+
+CPPFLAGS = ${OPTIONS} -I$(PNGINC)
+
+CFLAGS = -g -O3 -fomit-frame-pointer -Wall
+# [note that -Wall is a gcc-specific compilation flag ("all warnings on")]
+LDFLAGS =
+O = .o
+E =
+
+PNGCRUSH  = pngcrush
+
+LIBS = -L$(PNGLIB) -L$(ZLIB) -lpng -lz -lm
+
+OBJS  = pngcrush$(O)
+
+EXES = $(PNGCRUSH)$(E)
+
+# implicit make rules -------------------------------------------------------
+
+.c$(O): cexcept.h $(ZHDR)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
+
+# dependencies --------------------------------------------------------------
+
+
+all:  $(EXES)
+
+pngcrush$(O): pngcrush.c cexcept.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
+
+$(PNGCRUSH)$(E): $(OBJS)
+	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+
+# maintenance ---------------------------------------------------------------
+
+clean:
+	$(RM) $(EXES) $(OBJS)
+
+install:
+	mkdir -p $(DESTDIR)/usr/bin/
+	cp $(PNGCRUSH)$(E) $(DESTDIR)/usr/bin/
+	chmod 0755 $(DESTDIR)/usr/bin/$(PNGCRUSH)$(E)
+
